@@ -12,5 +12,12 @@ namespace Domain.Models
         public string Name { get; set; }
         public List<Institute> Institutes { get; set; }
         public string About { get; set; }
+        public List<ImageContent> ImageContents { get; set; }
+    }
+    public class ImageContent
+    {
+        public Guid Id { get; set; }
+        public string ImageUrl { get; set; }
+        public Guid UniversityId { get; set; }
     }
 }

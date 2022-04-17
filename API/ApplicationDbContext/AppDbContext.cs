@@ -15,7 +15,7 @@ namespace API.ApplicationDbContext
         public DbSet<Subject> Subjects { get; set; }
         public DbSet<Teacher> Teachers { get; set; }
         public DbSet<University> Universities { get; set; }
-
+        public DbSet<ImageContent> ImageContents { get; set; }
 
         public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options)

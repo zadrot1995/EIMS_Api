@@ -4,14 +4,16 @@ using API.ApplicationDbContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220417112304_addingUniversityImages")]
+    partial class addingUniversityImages
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -54,12 +56,7 @@ namespace API.Migrations
                     b.Property<string>("ImageUrl")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("UniversityId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("UniversityId");
 
                     b.ToTable("ImageContents");
                 });
@@ -203,15 +200,6 @@ namespace API.Migrations
                     b.Navigation("Curator");
                 });
 
-            modelBuilder.Entity("Domain.Models.ImageContent", b =>
-                {
-                    b.HasOne("Domain.Models.University", null)
-                        .WithMany("ImageContents")
-                        .HasForeignKey("UniversityId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("Domain.Models.Institute", b =>
                 {
                     b.HasOne("Domain.Models.University", null)
@@ -267,8 +255,6 @@ namespace API.Migrations
 
             modelBuilder.Entity("Domain.Models.University", b =>
                 {
-                    b.Navigation("ImageContents");
-
                     b.Navigation("Institutes");
                 });
 #pragma warning restore 612, 618

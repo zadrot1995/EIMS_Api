@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using API.ApplicationDbContext;
 using Domain.Models;
+using System.IO;
 
 namespace API.Controllers
 {
@@ -99,6 +100,59 @@ namespace API.Controllers
 
             return NoContent();
         }
+        [HttpPost("addimage")]
+        public async Task<IActionResult> AddImage(IFormFile image)
+        {
+            return Ok();
+
+        }
+        [HttpPost("image/{id}")]
+        public async Task<ActionResult> Imager(IFormFile file, Guid id)
+        {
+            {
+                if (file != null)
+                {
+                    var university2 = _context.Universities
+                        .Where(x => x.Id == id)
+                        .Include(x => x.ImageContents);
+                    var university = university2.FirstOrDefault();
+
+
+                    string uploads = Path.Combine(
+                        Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "uploads");
+                    uploads = Path.Combine(uploads, DateTime.Now.Ticks.ToString() + file.FileName).Replace(" ", "");
+                    //uploads = uploads.Replace(".", "");
+                    //uploads = uploads.Replace(":", "");
+                    //uploads = Path.Combine(uploads, file.FileName).Replace(" ", "");
+
+                    var imageUrl = uploads;
+
+                    if (file.Length > 0)
+                    {
+                        ImageContent fileContent = new ImageContent
+                        {
+                            ImageUrl = imageUrl
+                        };
+
+                        university.ImageContents.Add(fileContent);
+                        using (Stream fileStream = new FileStream(fileContent.ImageUrl, FileMode.Create))
+                        {
+                            await file.CopyToAsync(fileStream);
+                        }
+
+                    }
+
+                    await _context.SaveChangesAsync();
+                    return Ok(file);
+                }
+                else
+                {
+                    return BadRequest(file);
+                }
+
+            }
+        }
+
 
         private bool UniversityExists(Guid id)
         {
