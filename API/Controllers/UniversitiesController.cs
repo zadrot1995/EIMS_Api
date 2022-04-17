@@ -26,7 +26,7 @@ namespace API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<University>>> GetUniversities()
         {
-            return await _context.Universities.ToListAsync();
+            return await _context.Universities.Include(x => x.ImageContents).ToListAsync();
         }
 
         // GET: api/Universities/5
@@ -106,6 +106,15 @@ namespace API.Controllers
             return Ok();
 
         }
+
+        [HttpGet("image/{imageName}")]
+        public IActionResult Get(string imageName)
+        {
+            var image = System.IO.File.OpenRead($"C:\\Users\\zadro\\OneDrive\\Documents\\uploads\\{imageName}");
+            return File(image, "image/jpeg");
+        }
+
+
         [HttpPost("image/{id}")]
         public async Task<ActionResult> Imager(IFormFile file, Guid id)
         {
@@ -131,7 +140,8 @@ namespace API.Controllers
                     {
                         ImageContent fileContent = new ImageContent
                         {
-                            ImageUrl = imageUrl
+                            ImageUrl = imageUrl,
+                            ImageName = file.FileName
                         };
 
                         university.ImageContents.Add(fileContent);
