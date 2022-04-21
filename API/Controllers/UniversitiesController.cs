@@ -26,14 +26,18 @@ namespace API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<University>>> GetUniversities()
         {
-            return await _context.Universities.Include(x => x.ImageContents).ToListAsync();
+            var test = await _context.Universities.Include(x => x.ImageContents).ToListAsync();
+            return test;
         }
 
         // GET: api/Universities/5
         [HttpGet("{id}")]
         public async Task<ActionResult<University>> GetUniversity(Guid id)
         {
-            var university = await _context.Universities.FindAsync(id);
+            var university = await _context.Universities
+                .Include(x => x.ImageContents)
+                .Where(x => x.Id == id)
+                .FirstOrDefaultAsync();
 
             if (university == null)
             {
@@ -114,6 +118,25 @@ namespace API.Controllers
             return File(image, "image/jpeg");
         }
 
+        [HttpDelete("image/delete/{imageId}")]
+        public async Task<IActionResult> Get(Guid imageId)
+        {
+            var university = _context.Universities
+                .Include(x => x.ImageContents)
+                .Where(x => x.ImageContents
+                    .Any(y => y.Id == imageId))
+                .FirstOrDefault();
+            var image = university.ImageContents.Where(x => x.Id == imageId).FirstOrDefault();
+
+            if (System.IO.File.Exists(image.ImageUrl))
+            {
+                System.IO.File.Delete(image.ImageUrl);
+            }
+            university.ImageContents.Remove(image);
+            await _context.SaveChangesAsync();
+            return Ok();
+        }
+
 
         [HttpPost("image/{id}")]
         public async Task<ActionResult> Imager(IFormFile file, Guid id)
@@ -129,7 +152,8 @@ namespace API.Controllers
 
                     string uploads = Path.Combine(
                         Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "uploads");
-                    uploads = Path.Combine(uploads, DateTime.Now.Ticks.ToString() + file.FileName).Replace(" ", "");
+                    var fileName = DateTime.Now.Ticks.ToString() + file.FileName;
+                    uploads = Path.Combine(uploads, fileName).Replace(" ", "");
                     //uploads = uploads.Replace(".", "");
                     //uploads = uploads.Replace(":", "");
                     //uploads = Path.Combine(uploads, file.FileName).Replace(" ", "");
@@ -141,7 +165,7 @@ namespace API.Controllers
                         ImageContent fileContent = new ImageContent
                         {
                             ImageUrl = imageUrl,
-                            ImageName = file.FileName
+                            ImageName = fileName
                         };
 
                         university.ImageContents.Add(fileContent);
