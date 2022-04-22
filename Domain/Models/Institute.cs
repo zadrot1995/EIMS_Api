@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace Domain.Models
@@ -13,6 +15,9 @@ namespace Domain.Models
         public List<Teacher> Teachers { get; set; }
         public List<Group> Groups { get; set; }
         public string About { get; set; }
+        public Guid UniversityId { get; set; }
+        [JsonIgnore]
+        public University University { get; set; }
 
     }
 }

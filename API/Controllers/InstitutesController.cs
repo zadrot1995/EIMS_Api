@@ -25,7 +25,7 @@ namespace API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Institute>>> GetInstitutes()
         {
-            return await _context.Institutes.ToListAsync();
+            return await _context.Institutes.Include(x => x.University).ToListAsync();
         }
 
         // GET: api/Institutes/5

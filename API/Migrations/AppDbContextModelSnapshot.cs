@@ -79,7 +79,7 @@ namespace API.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid?>("UniversityId")
+                    b.Property<Guid>("UniversityId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
@@ -217,9 +217,13 @@ namespace API.Migrations
 
             modelBuilder.Entity("Domain.Models.Institute", b =>
                 {
-                    b.HasOne("Domain.Models.University", null)
+                    b.HasOne("Domain.Models.University", "University")
                         .WithMany("Institutes")
-                        .HasForeignKey("UniversityId");
+                        .HasForeignKey("UniversityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("University");
                 });
 
             modelBuilder.Entity("Domain.Models.Student", b =>
