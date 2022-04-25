@@ -78,6 +78,7 @@ namespace API.Controllers
         [HttpPost]
         public async Task<ActionResult<Teacher>> PostTeacher(Teacher teacher)
         {
+            teacher.UserType = Domain.Enums.UserType.Teacher;
             _context.Teachers.Add(teacher);
             await _context.SaveChangesAsync();
 
