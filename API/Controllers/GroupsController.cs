@@ -76,12 +76,12 @@ namespace API.Controllers
         // POST: api/Groups
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Group>> PostGroup(Group @group)
+        public async Task<ActionResult<Group>> PostGroup(Group group)
         {
-            _context.Groups.Add(@group);
+            _context.Groups.Add(group);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetGroup", new { id = @group.Id }, @group);
+            return CreatedAtAction("GetGroup", new { id = group.Id }, group);
         }
 
         // DELETE: api/Groups/5
