@@ -32,7 +32,11 @@ namespace API.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Group>> GetGroup(Guid id)
         {
-            var @group = await _context.Groups.FindAsync(id);
+            var @group = await _context.Groups
+                .Include(x => x.Curator)
+                .Include(x => x.Students)
+                .Where(x => x.Id == id)
+                .FirstOrDefaultAsync();
 
             if (@group == null)
             {
