@@ -32,7 +32,10 @@ namespace API.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Institute>> GetInstitute(Guid id)
         {
-            var institute = await _context.Institutes.FindAsync(id);
+            var institute = await _context.Institutes
+                .Include(x => x.Teachers)
+                .Where(x => x.Id == id)
+                .FirstOrDefaultAsync();
 
             if (institute == null)
             {

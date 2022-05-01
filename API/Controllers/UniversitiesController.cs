@@ -36,6 +36,7 @@ namespace API.Controllers
         {
             var university = await _context.Universities
                 .Include(x => x.ImageContents)
+                .Include(x => x.Institutes)
                 .Where(x => x.Id == id)
                 .FirstOrDefaultAsync();
 
