@@ -1,21 +1,19 @@
-﻿using System;
+﻿using Domain.Models;
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace Domain.Models
+namespace Domain.Dtos
 {
-    public class Group
+    public class AddGroupDto
     {
-        public Guid Id { get; set; }
         public string Name { get; set; }
         public List<Student> Students { get; set; }
         public Teacher Curator { get; set; }
-        public Guid CuratorId { get; set; }
-        [JsonIgnore]
-        public Institute Institute { get; set; }
         public Guid InstituteId { get; set; }
+        public IList AvalibleTeachers { get; set; }
     }
 }

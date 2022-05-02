@@ -4,14 +4,16 @@ using API.ApplicationDbContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220501192359_AddGroupInstitute")]
+    partial class AddGroupInstitute
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -25,7 +27,7 @@ namespace API.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CuratorId")
+                    b.Property<Guid?>("CuratorId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("InstituteId")
@@ -196,9 +198,7 @@ namespace API.Migrations
                 {
                     b.HasOne("Domain.Models.Teacher", "Curator")
                         .WithMany()
-                        .HasForeignKey("CuratorId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("CuratorId");
 
                     b.HasOne("Domain.Models.Institute", "Institute")
                         .WithMany("Groups")

@@ -103,6 +103,24 @@ namespace API.Controllers
 
             return NoContent();
         }
+        [HttpGet("teachers/{instituteId}")]
+        public async Task<ActionResult<IList<Teacher>>> GetTeachersByInstituteId(Guid instituteId)
+        {
+            var institute = await _context.Institutes
+                .Include(x => x.Teachers)
+                .Where(x => x.Id == instituteId)
+                .FirstOrDefaultAsync();
+            if(institute != null)
+            {
+                return institute.Teachers;
+            }
+            else
+            {
+                return NotFound();
+            }
+
+
+        }
 
         private bool InstituteExists(Guid id)
         {
