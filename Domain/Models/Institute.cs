@@ -18,6 +18,7 @@ namespace Domain.Models
         public Guid UniversityId { get; set; }
         [JsonIgnore]
         public University University { get; set; }
+        public List<Subject> Subjects { get; set; }
 
     }
 }

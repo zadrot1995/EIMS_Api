@@ -4,14 +4,16 @@ using API.ApplicationDbContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220502161532_addInstituteToSubject")]
+    partial class addInstituteToSubject
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -164,7 +166,7 @@ namespace API.Migrations
                     b.Property<string>("FirstName")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("InstituteId")
+                    b.Property<Guid?>("InstituteId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("SecondName")
@@ -278,13 +280,9 @@ namespace API.Migrations
 
             modelBuilder.Entity("Domain.Models.Teacher", b =>
                 {
-                    b.HasOne("Domain.Models.Institute", "Institute")
+                    b.HasOne("Domain.Models.Institute", null)
                         .WithMany("Teachers")
-                        .HasForeignKey("InstituteId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Institute");
+                        .HasForeignKey("InstituteId");
                 });
 
             modelBuilder.Entity("Domain.Models.Group", b =>
