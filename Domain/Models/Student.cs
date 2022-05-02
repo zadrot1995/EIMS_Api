@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace Domain.Models
 {
     public class Student : Member 
-    {
-        
+    {        
+        public Guid GroupId { get; set; }
     }
 }
