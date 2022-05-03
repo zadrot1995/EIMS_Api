@@ -32,7 +32,22 @@ namespace API.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Subject>> GetSubject(Guid id)
         {
-            var subject = await _context.Subjects.FindAsync(id);
+            var subject = await _context.Subjects
+                .Where(x => x.Id == id)
+                .FirstOrDefaultAsync();
+            subject.Groups = await _context.Groups
+                .Where(x => x.Subjects
+                    .Any(y => y.Id == id))
+                .Select(x => new Group 
+                {
+                    Id = x.Id,
+                    CuratorId = x.CuratorId,
+                    InstituteId = x.InstituteId,
+                    Subjects = new List<Subject>(),
+                    Name = x.Name
+
+                }).ToListAsync();
+            subject.Groups.Select(x => x.Subjects == new List<Subject>());
 
             if (subject == null)
             {

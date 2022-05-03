@@ -35,6 +35,7 @@ namespace API.Controllers
             var institute = await _context.Institutes
                 .Include(x => x.Teachers)
                 .Include(x => x.Groups)
+                .Include(x => x.Subjects)
                 .Where(x => x.Id == id)
                 .FirstOrDefaultAsync();
 

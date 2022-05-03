@@ -28,6 +28,11 @@ namespace API.Controllers
             return await _context.Groups.ToListAsync();
         }
 
+        [HttpGet("byInstitute/{instituteId}")]
+        public async Task<ActionResult<IEnumerable<Group>>> GetSubjectsByInstituteId(Guid instituteId)
+        {
+            return await _context.Groups.Where(x => x.InstituteId == instituteId).ToListAsync();
+        }
         // GET: api/Groups/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Group>> GetGroup(Guid id)

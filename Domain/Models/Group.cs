@@ -17,5 +17,6 @@ namespace Domain.Models
         [JsonIgnore]
         public Institute Institute { get; set; }
         public Guid InstituteId { get; set; }
+        public List<Subject> Subjects { get; set; }
     }
 }
