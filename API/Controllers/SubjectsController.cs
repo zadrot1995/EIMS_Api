@@ -33,6 +33,8 @@ namespace API.Controllers
         public async Task<ActionResult<Subject>> GetSubject(Guid id)
         {
             var subject = await _context.Subjects
+                .Include(x => x.Lecturer)
+                .Include(x => x.Practitioner)
                 .Where(x => x.Id == id)
                 .FirstOrDefaultAsync();
             subject.Groups = await _context.Groups
