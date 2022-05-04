@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using API.ApplicationDbContext;
 using Domain.Models;
+using Domain.Dtos;
 
 namespace API.Controllers
 {
@@ -105,6 +106,63 @@ namespace API.Controllers
             await _context.SaveChangesAsync();
 
             return NoContent();
+        }
+
+        [HttpPost("upload-student-by-excel-file")]
+        public async Task<ActionResult<bool>> AddStudentsFromExcel(List<StudentExcelDto> students)
+        {
+           if(students != null && students.Count != 0)
+           {
+                foreach(var student in students)
+                {
+                    student.UniversityName.Trim().ToLower();
+                    var university = await _context.Universities
+                        .Include(u => u.Institutes)
+                            .ThenInclude(i => i.Groups)
+                                .ThenInclude(g => g.Students)
+                        .Where(u => u.Name.ToLower() == student.UniversityName.Trim().ToLower())
+                        .FirstOrDefaultAsync();
+                    if(university != null)
+                    {
+                        var institute = university.Institutes
+                            .Where(i => i.Name.ToLower() == student.InstituteName.Trim().ToLower())
+                            .FirstOrDefault();
+                        if(institute != null)
+                        {
+                            var group = institute.Groups
+                                .Where(group => group.Name.ToLower() == student.GroupName.Trim().ToLower())
+                                .FirstOrDefault();
+                            if(group != null)
+                            {
+                                group.Students.Add(new Student
+                                {
+                                    FirstName = student.FirstName,
+                                    SecondName = student.SecondName,
+                                    GroupId = group.Id
+                                });
+                            }
+                            else
+                            {
+                                return BadRequest("There no such group like" + student.GroupName);
+                            }
+                        }
+                        else
+                        {
+                            return BadRequest("There no such institute like" + student.InstituteName);
+                        }
+                    }
+                    else
+                    {
+                        return BadRequest("There no such university like" + student.UniversityName);
+                    }
+                }
+                await _context.SaveChangesAsync();
+                return Ok();
+           }
+            else
+            {
+                return BadRequest("File is empty");
+            }
         }
 
         private bool StudentExists(Guid id)
