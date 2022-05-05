@@ -11,5 +11,39 @@ namespace Domain.Dtos
     {
         public Student Student { get; set; }
         public List<Mark> Marks { get; set; }
+        public List<Mark> PracticMarks { 
+            get
+            { 
+                return Marks.Where(x => x.MarkType == Enums.MarkType.Practice).ToList();
+            }
+        }
+        public Mark ExamMark
+        {
+            get
+            {
+                return Marks.Where(x => x.MarkType == Enums.MarkType.Exam).FirstOrDefault();
+            }
+        }
+        public Mark FirstModularTestWorkMark
+        {
+            get
+            {
+                return Marks.Where(x => x.MarkType == Enums.MarkType.FirstModularTestWork).FirstOrDefault();
+            }
+        }
+        public Mark SecondModularTestWorkMark
+        {
+            get
+            {
+                return Marks.Where(x => x.MarkType == Enums.MarkType.SecondModularTestWork).FirstOrDefault();
+            }
+        }
+        public int Total
+        {
+            get
+            {
+                return Marks.Sum(x => x.Value);
+            }
+        }
     }
 }
