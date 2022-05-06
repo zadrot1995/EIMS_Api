@@ -111,9 +111,16 @@ namespace API.Controllers
                 .Include(x => x.Students)
                 .Where(x => x.Id == groupId)
                 .FirstOrDefault();
-            if(group != null)
+            var subject = _context.Subjects
+                .Include(x => x.Lecturer)
+                .Include(x => x.Practitioner)
+                .Where(x => x.Id == subjectId)
+                .FirstOrDefault();
+
+            if (group != null && subject != null)
             {
                 journal.Group = group;
+                journal.Subject = subject;
                 journal.JournalRows = new List<JournalRowDto>();
                 foreach(var student in journal.Group.Students)
                 {

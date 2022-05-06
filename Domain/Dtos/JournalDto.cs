@@ -11,5 +11,6 @@ namespace Domain.Dtos
     {
         public Group Group { get; set; }
         public List<JournalRowDto> JournalRows { get; set; }
+        public Subject Subject { get; set; }
     }
 }
