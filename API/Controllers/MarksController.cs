@@ -126,6 +126,7 @@ namespace API.Controllers
                             .Where(x => x.StudentId == student.Id && x.SubjectId == subjectId)
                             .ToListAsync()
                     };
+
                     journal.JournalRows.Add(journalRow);
                 }
                 return Ok(journal);
