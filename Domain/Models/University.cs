@@ -13,6 +13,7 @@ namespace Domain.Models
         public List<Institute> Institutes { get; set; }
         public string About { get; set; }
         public List<ImageContent> ImageContents { get; set; }
+        public List<Post> Posts { get; set; }
     }
     public class ImageContent
     {

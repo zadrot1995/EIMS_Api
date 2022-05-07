@@ -4,14 +4,16 @@ using API.ApplicationDbContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220507163456_AddingPostsTitle")]
+    partial class AddingPostsTitle
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -129,14 +131,14 @@ namespace API.Migrations
                     b.Property<string>("Title")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("UniversityId")
+                    b.Property<Guid?>("UniversityId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
                     b.HasIndex("UniversityId");
 
-                    b.ToTable("Posts");
+                    b.ToTable("Post");
                 });
 
             modelBuilder.Entity("Domain.Models.Student", b =>
@@ -319,13 +321,9 @@ namespace API.Migrations
 
             modelBuilder.Entity("Domain.Models.Post", b =>
                 {
-                    b.HasOne("Domain.Models.University", "University")
+                    b.HasOne("Domain.Models.University", null)
                         .WithMany("Posts")
-                        .HasForeignKey("UniversityId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("University");
+                        .HasForeignKey("UniversityId");
                 });
 
             modelBuilder.Entity("Domain.Models.Student", b =>
