@@ -19,6 +19,8 @@ namespace Domain.Models
         [JsonIgnore]
         public University University { get; set; }
         public List<Subject> Subjects { get; set; }
+        public List<ImageContent> ImageContents { get; set; }
+
 
     }
 }

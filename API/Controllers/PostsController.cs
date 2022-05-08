@@ -88,5 +88,22 @@ namespace API.Controllers
                 return BadRequest();
             }
         }
+
+
+        // DELETE: api/Marks/5
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeletePost(Guid id)
+        {
+            var post = await _context.Posts.FindAsync(id);
+            if (post == null)
+            {
+                return NotFound();
+            }
+
+            _context.Posts.Remove(post);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
     }
 }

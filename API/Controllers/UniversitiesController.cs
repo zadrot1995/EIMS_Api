@@ -36,7 +36,6 @@ namespace API.Controllers
         {
             var university = await _context.Universities
                 .Include(x => x.ImageContents)
-                .Include(x => x.Institutes)
                 .Include(x => x.Posts)
                 .Where(x => x.Id == id)
                 .FirstOrDefaultAsync();
@@ -61,6 +60,11 @@ namespace API.Controllers
 
             _context.Entry(university).State = EntityState.Modified;
 
+
+            foreach(var post in university.Posts)
+            {
+                _context.Posts.Update(post);
+            }
             try
             {
                 await _context.SaveChangesAsync();

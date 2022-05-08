@@ -19,7 +19,8 @@ namespace Domain.Models
     {
         public Guid Id { get; set; }
         public string ImageUrl { get; set; }
-        public Guid UniversityId { get; set; }
+        public Guid? UniversityId { get; set; }
+        public Guid? InstituteId { get; set; }
         public string ImageName { get; set; }
     }
 }

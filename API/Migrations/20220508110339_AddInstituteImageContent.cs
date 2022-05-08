@@ -3,43 +3,41 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace API.Migrations
 {
-    public partial class addingUniversityImagesId : Migration
+    public partial class AddInstituteImageContent : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<Guid>(
-                name: "UniversityId",
+                name: "InstituteId",
                 table: "ImageContents",
                 type: "uniqueidentifier",
-                nullable: true,
-                defaultValue: new Guid("00000000-0000-0000-0000-000000000000"));
+                nullable: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_ImageContents_UniversityId",
+                name: "IX_ImageContents_InstituteId",
                 table: "ImageContents",
-                column: "UniversityId");
+                column: "InstituteId");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_ImageContents_Universities_UniversityId",
+                name: "FK_ImageContents_Institutes_InstituteId",
                 table: "ImageContents",
-                column: "UniversityId",
-                principalTable: "Universities",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                column: "InstituteId",
+                principalTable: "Institutes",
+                principalColumn: "Id");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "FK_ImageContents_Universities_UniversityId",
+                name: "FK_ImageContents_Institutes_InstituteId",
                 table: "ImageContents");
 
             migrationBuilder.DropIndex(
-                name: "IX_ImageContents_UniversityId",
+                name: "IX_ImageContents_InstituteId",
                 table: "ImageContents");
 
             migrationBuilder.DropColumn(
-                name: "UniversityId",
+                name: "InstituteId",
                 table: "ImageContents");
         }
     }

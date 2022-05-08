@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using API.ApplicationDbContext;
 using Domain.Models;
+using System.IO;
 
 namespace API.Controllers
 {
@@ -25,7 +26,10 @@ namespace API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Institute>>> GetInstitutes()
         {
-            return await _context.Institutes.Include(x => x.University).ToListAsync();
+            return await _context.Institutes
+                .Include(x => x.University)
+                .Include(x => x.ImageContents)
+                .ToListAsync();
         }
 
         // GET: api/Institutes/5
@@ -36,6 +40,7 @@ namespace API.Controllers
                 .Include(x => x.Teachers)
                 .Include(x => x.Groups)
                 .Include(x => x.Subjects)
+                .Include(x => x.ImageContents)
                 .Where(x => x.Id == id)
                 .FirstOrDefaultAsync();
 
@@ -122,6 +127,78 @@ namespace API.Controllers
 
 
         }
+
+        [HttpGet("university/{universityId}")]
+        public async Task<ActionResult<IList<Institute>>> GetInstitutesByUniversityId(Guid universityId)
+        {
+            var university = await _context.Universities
+                .Include(x => x.Institutes)
+                .ThenInclude(y => y.ImageContents)
+                .Where(x => x.Id == universityId)
+                .FirstOrDefaultAsync();
+            if (university != null)
+            {
+                return university.Institutes;
+            }
+            else
+            {
+                return NotFound();
+            }
+
+
+        }
+
+
+
+        [HttpPost("image/{id}")]
+        public async Task<ActionResult> Imager(IFormFile file, Guid id)
+        {
+            {
+                if (file != null)
+                {
+                    var instituteQwery = _context.Institutes
+                        .Where(x => x.Id == id)
+                        .Include(x => x.ImageContents);
+                    var institute = instituteQwery.FirstOrDefault();
+
+                    string uploads = Path.Combine(
+                        Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "uploads");
+                    var fileName = DateTime.Now.Ticks.ToString() + file.FileName;
+                    uploads = Path.Combine(uploads, fileName).Replace(" ", "");
+                    //uploads = uploads.Replace(".", "");
+                    //uploads = uploads.Replace(":", "");
+                    //uploads = Path.Combine(uploads, file.FileName).Replace(" ", "");
+
+                    var imageUrl = uploads;
+
+                    if (file.Length > 0)
+                    {
+                        ImageContent fileContent = new ImageContent
+                        {
+                            ImageUrl = imageUrl,
+                            ImageName = fileName
+                        };
+
+                        institute.ImageContents.Add(fileContent);
+                        using (Stream fileStream = new FileStream(fileContent.ImageUrl, FileMode.Create))
+                        {
+                            await file.CopyToAsync(fileStream);
+                        }
+
+                    }
+
+                    await _context.SaveChangesAsync();
+                    return Ok(file);
+                }
+                else
+                {
+                    return BadRequest(file);
+                }
+
+            }
+        }
+
+
 
         private bool InstituteExists(Guid id)
         {
