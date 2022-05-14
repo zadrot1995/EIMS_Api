@@ -2,6 +2,7 @@
 using Domain.Dtos;
 using Domain.Models;
 using Infrastructure.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -28,6 +29,20 @@ namespace API.Controllers
             _tokenService = tokenService ?? throw new ArgumentNullException(nameof(tokenService));
         }
 
+        [HttpGet("getUser"), Authorize]
+        public async Task<IActionResult> GetUser()
+        {
+            var role = this.User.Claims.Where(x => x.Type == ClaimTypes.Role).FirstOrDefault().Value;
+            return Ok(new { userName = this.User.Identity.Name, userType = role });
+        }
+
+        [HttpGet("getUserRole"), Authorize]
+        public async Task<IActionResult> GetUserRole()
+        {
+            var role = this.User.Claims.Where(x => x.Type == ClaimTypes.Role).FirstOrDefault().Value;
+            return Ok(new { userType = role });
+        }
+
         [HttpPost, Route("login")]
         public IActionResult Login([FromBody] LoginModel loginModel)
         {
@@ -42,7 +57,7 @@ namespace API.Controllers
             var claims = new List<Claim>
         {
             new Claim(ClaimTypes.Name, loginModel.UserName),
-            new Claim(ClaimTypes.Role, "Manager")
+            new Claim(ClaimTypes.Role, user.UserType.ToString())
         };
             var accessToken = _tokenService.GenerateAccessToken(claims);
             var refreshToken = _tokenService.GenerateRefreshToken();
