@@ -18,10 +18,22 @@ namespace API.ApplicationDbContext
         public DbSet<ImageContent> ImageContents { get; set; }
         public DbSet<Mark> Marks { get; set; }
         public DbSet<Post> Posts { get; set; }
+        public DbSet<LoginModel>? LoginModels { get; set; }
+
 
         public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options)
         {
+        }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<LoginModel>().HasData(new LoginModel
+            {
+                Id = 1,
+                UserName = "Admin",
+                Password = "def@123"
+            });
         }
     }
 }
