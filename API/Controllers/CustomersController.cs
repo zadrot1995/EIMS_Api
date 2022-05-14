@@ -12,7 +12,7 @@ namespace API.Controllers
     [ApiController]
     public class CustomersController : ControllerBase
     {
-        [HttpGet, Authorize(Roles = "Manager")]
+        [HttpGet, Authorize(Roles = "Admin")]
         public IEnumerable<string> Get()
         {
             return new string[] { "John Doe", "Jane Doe" };
