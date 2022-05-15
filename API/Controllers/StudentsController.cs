@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using API.ApplicationDbContext;
 using Domain.Models;
 using Domain.Dtos;
+using Microsoft.AspNetCore.Authorization;
 
 namespace API.Controllers
 {
@@ -165,6 +166,51 @@ namespace API.Controllers
             }
         }
 
+        [HttpGet("get-student-profile/{id}"), Authorize(Roles = "Student")]
+        public async Task<ActionResult<StudentProfileDto>> GetStudentProfileDtoAsync(Guid id)
+        {
+            var user = _context.LoginModels.Where(x => x.UserName == HttpContext.User.Identity.Name).FirstOrDefault();
+
+            var student = await _context.Students.Where(x => x.Id == user.UserDetails).FirstOrDefaultAsync();
+
+            if(student != null)
+            {
+                var studentProfile = new StudentProfileDto
+                {
+                    FirstName = student.FirstName,
+                    SecondName = student.SecondName
+                };
+                var group = await _context.Groups
+                    .Include(x => x.Subjects)
+                    .Where(x => x.Id == student.GroupId).FirstOrDefaultAsync();
+
+                studentProfile.Group = group;
+                studentProfile.Institute = group.Institute;
+
+                foreach(var subject in group.Subjects)
+                {
+                    subject.Groups = null;
+                    JournalRowDto journalRow = new JournalRowDto
+                    {
+                        Student = student,
+                        Marks = await _context.Marks
+                            .Where(x => x.StudentId == student.Id && x.SubjectId == subject.Id)
+                            .ToListAsync()
+                    };
+                    studentProfile.Subjects = new List<SubjectDto>();
+                    studentProfile.Subjects.Add(new SubjectDto
+                    {
+                        Subject = subject,
+                        Total = journalRow.Total
+                    });
+                }
+                return Ok(studentProfile);
+            }
+            else
+            {
+                return NotFound();
+            }
+        }
         private bool StudentExists(Guid id)
         {
             return _context.Students.Any(e => e.Id == id);

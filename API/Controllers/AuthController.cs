@@ -58,6 +58,7 @@ namespace API.Controllers
         {
             new Claim(ClaimTypes.Name, loginModel.UserName),
             new Claim(ClaimTypes.Role, user.UserType.ToString())
+            
         };
             var accessToken = _tokenService.GenerateAccessToken(claims);
             var refreshToken = _tokenService.GenerateRefreshToken();
