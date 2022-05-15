@@ -17,6 +17,8 @@ namespace Domain.Dtos
         public Group Group { get; set; }
         public Institute Institute { get; set; }
         public University University { get; set; }
+        public UserJournal UserJournal { get; set; }
+        public string UserPhoto { get; set; }
 
     }
 }

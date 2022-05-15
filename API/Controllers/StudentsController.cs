@@ -9,6 +9,7 @@ using API.ApplicationDbContext;
 using Domain.Models;
 using Domain.Dtos;
 using Microsoft.AspNetCore.Authorization;
+using System.IO;
 
 namespace API.Controllers
 {
@@ -47,15 +48,49 @@ namespace API.Controllers
         // PUT: api/Students/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutStudent(Guid id, Student student)
+        public async Task<IActionResult> PutStudent(Guid id)
         {
-            if (id != student.Id)
+            var file = this.HttpContext.Request.Form.Files.FirstOrDefault();
+            var userPhoto = this.HttpContext.Request.Form["UserPhoto"].ToString();
+            var firstName = this.HttpContext.Request.Form["firstName"].ToString();
+            var secondName = this.HttpContext.Request.Form["secondName"].ToString();
+
+            var student = await _context.Students.Where(x => x.Id == id).FirstOrDefaultAsync();
+
+            if (student == null)
             {
                 return BadRequest();
             }
 
-            _context.Entry(student).State = EntityState.Modified;
+            student.FirstName = firstName;
+            student.SecondName = secondName;
 
+            if(file != null)
+            {
+               
+               
+                    string uploads = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "uploads");
+                    var fileName = DateTime.Now.Ticks.ToString() + file.FileName;
+                    uploads = Path.Combine(uploads, fileName).Replace(" ", "");
+                    //uploads = uploads.Replace(".", "");
+                    //uploads = uploads.Replace(":", "");
+                    //uploads = Path.Combine(uploads, file.FileName).Replace(" ", "");
+
+                    var imageUrl = uploads;
+
+                    if (file.Length > 0)
+                    {
+                        student.UserPhoto = fileName;
+                        using (Stream fileStream = new FileStream(uploads, FileMode.Create))
+                        {
+                            await file.CopyToAsync(fileStream);
+                        }
+
+                    }
+
+                
+            }
             try
             {
                 await _context.SaveChangesAsync();
@@ -167,7 +202,7 @@ namespace API.Controllers
         }
 
         [HttpGet("get-student-profile/{id}"), Authorize(Roles = "Student")]
-        public async Task<ActionResult<StudentProfileDto>> GetStudentProfileDtoAsync(Guid id)
+        public async Task<ActionResult<StudentProfileDto>> GetStudentProfileDtoAsync(long id)
         {
             var user = _context.LoginModels.Where(x => x.UserName == HttpContext.User.Identity.Name).FirstOrDefault();
 
@@ -177,32 +212,34 @@ namespace API.Controllers
             {
                 var studentProfile = new StudentProfileDto
                 {
+                    Id = student.Id,
                     FirstName = student.FirstName,
-                    SecondName = student.SecondName
+                    SecondName = student.SecondName,
+                    UserPhoto = student.UserPhoto,
+                    UserJournal = new UserJournal()
                 };
                 var group = await _context.Groups
                     .Include(x => x.Subjects)
+                    .Include(x => x.Institute)
+                    .ThenInclude(y => y.University)
                     .Where(x => x.Id == student.GroupId).FirstOrDefaultAsync();
 
                 studentProfile.Group = group;
                 studentProfile.Institute = group.Institute;
-
+                studentProfile.University = group.Institute.University;
+                studentProfile.UserJournal = new UserJournal();
+                studentProfile.UserJournal.UserJournalRows = new List<UserJournalRow>();
                 foreach(var subject in group.Subjects)
                 {
                     subject.Groups = null;
-                    JournalRowDto journalRow = new JournalRowDto
+                    var userJournalRow = new UserJournalRow()
                     {
-                        Student = student,
+                        SubjectName = subject.Name,
                         Marks = await _context.Marks
-                            .Where(x => x.StudentId == student.Id && x.SubjectId == subject.Id)
-                            .ToListAsync()
+                        .Where(x => x.StudentId == student.Id && x.SubjectId == subject.Id)
+                        .ToListAsync()
                     };
-                    studentProfile.Subjects = new List<SubjectDto>();
-                    studentProfile.Subjects.Add(new SubjectDto
-                    {
-                        Subject = subject,
-                        Total = journalRow.Total
-                    });
+                    studentProfile.UserJournal.UserJournalRows.Add(userJournalRow);
                 }
                 return Ok(studentProfile);
             }

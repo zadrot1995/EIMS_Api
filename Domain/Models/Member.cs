@@ -13,5 +13,6 @@ namespace Domain.Models
         public string FirstName { get; set; }
         public string SecondName { get; set; }
         public UserType UserType { get; set; }
+        public string UserPhoto { get; set; }
     }
 }
