@@ -33,7 +33,9 @@ namespace API.Controllers
         public async Task<IActionResult> GetUser()
         {
             var role = this.User.Claims.Where(x => x.Type == ClaimTypes.Role).FirstOrDefault().Value;
-            return Ok(new { userName = this.User.Identity.Name, userType = role });
+            var user = _context.LoginModels.Where(x => x.UserName == HttpContext.User.Identity.Name).FirstOrDefault();
+
+            return Ok(new { userName = this.User.Identity.Name, userType = role, id = user.Id });
         }
 
         [HttpGet("getUserRole"), Authorize]
