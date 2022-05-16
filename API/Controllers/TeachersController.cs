@@ -10,6 +10,8 @@ using Domain.Models;
 using Microsoft.AspNetCore.Authorization;
 using Domain.Dtos;
 using System.IO;
+using System.Text;
+using Infrastructure.Helpers;
 
 namespace API.Controllers
 {
@@ -77,6 +79,7 @@ namespace API.Controllers
                 string uploads = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "uploads");
                 var fileName = DateTime.Now.Ticks.ToString() + file.FileName;
+                fileName = StringHelper.RemoveSpecialCharacters(fileName);
                 uploads = Path.Combine(uploads, fileName).Replace(" ", "");
                 //uploads = uploads.Replace(".", "");
                 //uploads = uploads.Replace(":", "");
@@ -145,7 +148,7 @@ namespace API.Controllers
 
 
         [HttpGet("get-teacher-profile/{id}"), Authorize(Roles = "Teacher")]
-        public async Task<ActionResult<TeacherProfileDto>> GetStudentProfileDtoAsync(long id)
+        public async Task<ActionResult<TeacherProfileDto>> GetTeachersProfileDtoAsync(long id)
         {
             var user = _context.LoginModels.Where(x => x.UserName == HttpContext.User.Identity.Name).FirstOrDefault();
 
@@ -175,6 +178,37 @@ namespace API.Controllers
                 return NotFound();
             }
         }
+
+        [HttpGet("teacher-overview/{id}")]
+        public async Task<ActionResult<TeacherProfileDto>> GetTeachersoverviewAsync(Guid id)
+        {
+            var teacher = await _context.Teachers
+                .Include(x => x.Institute)
+                .Where(x => x.Id == id)
+                .FirstOrDefaultAsync();
+
+            if (teacher != null)
+            {
+                var subjects = await _context.Subjects
+                    .Where(x => x.LecturerId == teacher.Id || x.PractitionerId == teacher.Id)
+                    .ToListAsync();
+
+                var teacherProfile = new TeacherProfileDto
+                {
+                    Teacher = teacher,
+                    Institute = teacher.Institute,
+                    LectureSubjects = subjects.Where(x => x.LecturerId == teacher.Id).ToList(),
+                    PracticalSubjects = subjects.Where(x => x.PractitionerId == teacher.Id).ToList(),
+                };
+
+                return Ok(teacherProfile);
+            }
+            else
+            {
+                return NotFound();
+            }
+        }
+
         private bool TeacherExists(Guid id)
         {
             return _context.Teachers.Any(e => e.Id == id);

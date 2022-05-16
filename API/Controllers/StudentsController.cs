@@ -10,6 +10,7 @@ using Domain.Models;
 using Domain.Dtos;
 using Microsoft.AspNetCore.Authorization;
 using System.IO;
+using Infrastructure.Helpers;
 
 namespace API.Controllers
 {
@@ -70,7 +71,9 @@ namespace API.Controllers
                     string uploads = Path.Combine(
                     Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "uploads");
                     var fileName = DateTime.Now.Ticks.ToString() + file.FileName;
-                    uploads = Path.Combine(uploads, fileName).Replace(" ", "");
+                    fileName = StringHelper.RemoveSpecialCharacters(fileName);
+
+                uploads = Path.Combine(uploads, fileName).Replace(" ", "");
                     //uploads = uploads.Replace(".", "");
                     //uploads = uploads.Replace(":", "");
                     //uploads = Path.Combine(uploads, file.FileName).Replace(" ", "");

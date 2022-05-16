@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using API.ApplicationDbContext;
 using Domain.Models;
 using System.IO;
+using Infrastructure.Helpers;
 
 namespace API.Controllers
 {
@@ -159,6 +160,8 @@ namespace API.Controllers
                     string uploads = Path.Combine(
                         Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "uploads");
                     var fileName = DateTime.Now.Ticks.ToString() + file.FileName;
+                    fileName = StringHelper.RemoveSpecialCharacters(fileName);
+
                     uploads = Path.Combine(uploads, fileName).Replace(" ", "");
                     //uploads = uploads.Replace(".", "");
                     //uploads = uploads.Replace(":", "");
