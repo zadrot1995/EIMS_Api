@@ -67,8 +67,6 @@ namespace API.Controllers
 
             if(file != null)
             {
-               
-               
                     string uploads = Path.Combine(
                     Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "uploads");
                     var fileName = DateTime.Now.Ticks.ToString() + file.FileName;
@@ -248,6 +246,54 @@ namespace API.Controllers
                 return NotFound();
             }
         }
+
+        [HttpGet("student-overview/{id}")]
+        public async Task<ActionResult<StudentProfileDto>> GetStudentOverviewAsync(Guid id)
+        {
+
+            var student = await _context.Students.Where(x => x.Id == id).FirstOrDefaultAsync();
+
+            if (student != null)
+            {
+                var studentProfile = new StudentProfileDto
+                {
+                    Id = student.Id,
+                    FirstName = student.FirstName,
+                    SecondName = student.SecondName,
+                    UserPhoto = student.UserPhoto,
+                    UserJournal = new UserJournal()
+                };
+                var group = await _context.Groups
+                    .Include(x => x.Subjects)
+                    .Include(x => x.Institute)
+                    .ThenInclude(y => y.University)
+                    .Where(x => x.Id == student.GroupId).FirstOrDefaultAsync();
+
+                studentProfile.Group = group;
+                studentProfile.Institute = group.Institute;
+                studentProfile.University = group.Institute.University;
+                studentProfile.UserJournal = new UserJournal();
+                studentProfile.UserJournal.UserJournalRows = new List<UserJournalRow>();
+                foreach (var subject in group.Subjects)
+                {
+                    subject.Groups = null;
+                    var userJournalRow = new UserJournalRow()
+                    {
+                        SubjectName = subject.Name,
+                        Marks = await _context.Marks
+                        .Where(x => x.StudentId == student.Id && x.SubjectId == subject.Id)
+                        .ToListAsync()
+                    };
+                    studentProfile.UserJournal.UserJournalRows.Add(userJournalRow);
+                }
+                return Ok(studentProfile);
+            }
+            else
+            {
+                return NotFound();
+            }
+        }
+
         private bool StudentExists(Guid id)
         {
             return _context.Students.Any(e => e.Id == id);

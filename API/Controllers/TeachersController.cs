@@ -7,6 +7,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using API.ApplicationDbContext;
 using Domain.Models;
+using Microsoft.AspNetCore.Authorization;
+using Domain.Dtos;
+using System.IO;
 
 namespace API.Controllers
 {
@@ -45,15 +48,54 @@ namespace API.Controllers
         // PUT: api/Teachers/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutTeacher(Guid id, Teacher teacher)
+        public async Task<IActionResult> PutTeacher(Guid id)
         {
-            if (id != teacher.Id)
+            var file = this.HttpContext.Request.Form.Files.FirstOrDefault();
+            var userPhoto = this.HttpContext.Request.Form["UserPhoto"].ToString();
+            var firstName = this.HttpContext.Request.Form["firstName"].ToString();
+            var secondName = this.HttpContext.Request.Form["secondName"].ToString();
+            var education = this.HttpContext.Request.Form["education"].ToString();
+            var degree = this.HttpContext.Request.Form["degree"].ToString();
+            var about = this.HttpContext.Request.Form["about"].ToString();
+
+            var teacher = await _context.Teachers.Where(x => x.Id == id).FirstOrDefaultAsync();
+
+            if (teacher == null)
             {
                 return BadRequest();
             }
 
-            _context.Entry(teacher).State = EntityState.Modified;
+            teacher.FirstName = firstName;
+            teacher.SecondName = secondName;
+            teacher.Degree = degree;
+            teacher.About = about;
+            teacher.Education = education;
 
+
+            if (file != null)
+            {
+                string uploads = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "uploads");
+                var fileName = DateTime.Now.Ticks.ToString() + file.FileName;
+                uploads = Path.Combine(uploads, fileName).Replace(" ", "");
+                //uploads = uploads.Replace(".", "");
+                //uploads = uploads.Replace(":", "");
+                //uploads = Path.Combine(uploads, file.FileName).Replace(" ", "");
+
+                var imageUrl = uploads;
+
+                if (file.Length > 0)
+                {
+                    teacher.UserPhoto = fileName;
+                    using (Stream fileStream = new FileStream(uploads, FileMode.Create))
+                    {
+                        await file.CopyToAsync(fileStream);
+                    }
+
+                }
+
+
+            }
             try
             {
                 await _context.SaveChangesAsync();
@@ -101,6 +143,38 @@ namespace API.Controllers
             return NoContent();
         }
 
+
+        [HttpGet("get-teacher-profile/{id}"), Authorize(Roles = "Teacher")]
+        public async Task<ActionResult<TeacherProfileDto>> GetStudentProfileDtoAsync(long id)
+        {
+            var user = _context.LoginModels.Where(x => x.UserName == HttpContext.User.Identity.Name).FirstOrDefault();
+
+            var teacher = await _context.Teachers
+                .Include(x => x.Institute)
+                .Where(x => x.Id == user.UserDetails)
+                .FirstOrDefaultAsync();
+
+            if (teacher != null)
+            {
+                var subjects = await _context.Subjects
+                    .Where(x => x.LecturerId == teacher.Id || x.PractitionerId == teacher.Id)
+                    .ToListAsync();
+
+                var teacherProfile = new TeacherProfileDto
+                {
+                    Teacher = teacher,
+                    Institute = teacher.Institute,
+                    LectureSubjects = subjects.Where(x => x.LecturerId == teacher.Id).ToList(),
+                    PracticalSubjects = subjects.Where(x => x.PractitionerId == teacher.Id).ToList(),
+                };
+                
+                return Ok(teacherProfile);
+            }
+            else
+            {
+                return NotFound();
+            }
+        }
         private bool TeacherExists(Guid id)
         {
             return _context.Teachers.Any(e => e.Id == id);
