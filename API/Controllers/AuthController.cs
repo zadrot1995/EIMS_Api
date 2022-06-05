@@ -35,7 +35,7 @@ namespace API.Controllers
             var role = this.User.Claims.Where(x => x.Type == ClaimTypes.Role).FirstOrDefault().Value;
             var user = _context.LoginModels.Where(x => x.UserName == HttpContext.User.Identity.Name).FirstOrDefault();
 
-            return Ok(new { userName = this.User.Identity.Name, userType = role, id = user.Id });
+            return Ok(new { userName = this.User.Identity.Name, userType = role, id = user.Id, userDetails = user.UserDetails });
         }
 
         [HttpGet("getUserRole"), Authorize]
@@ -44,6 +44,8 @@ namespace API.Controllers
             var role = this.User.Claims.Where(x => x.Type == ClaimTypes.Role).FirstOrDefault().Value;
             return Ok(new { userType = role });
         }
+
+        
 
         [HttpPost, Route("login")]
         public IActionResult Login([FromBody] LoginModel loginModel)

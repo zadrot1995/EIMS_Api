@@ -16,5 +16,6 @@ namespace Domain.Models
         public Guid SubjectId { get; set; }
         public MarkType MarkType { get; set; }
         public int Value { get; set; }
+        public int Module { get; set; }
     }
 }
